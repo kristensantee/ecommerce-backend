@@ -5,7 +5,9 @@ const { Category, Product } = require('../../models');
 
 // find all categories be sure to include its associated products
 router.get('/', (req, res) => {
-  Category.findAll().then(data=>{
+  Category.findAll({
+    include:[{model: Product}]
+  }).then(data=>{
     res.json(data)
   }).catch(err=>{
     res.status(500).json({msg: "zoinks!", err})
@@ -14,7 +16,9 @@ router.get('/', (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try { 
-    const categoryData = await Category.findByPk(req.params.id,);
+    const categoryData = await Category.findByPk(req.params.id,{
+      include: [{model:Product}]
+    });
   if (!categoryData) {
     res.status(404).json({msg: "No category with this ID!"});
     return;
@@ -25,9 +29,17 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', (req, res) => {
-  // create a new category
-});
+router.post("/",async (req,res)=>{
+  try{
+      const newCategory = await Category.create({
+          category_name:req.body.category_name,
+      })
+      res.status(201).json(newCategory)
+  }catch(err){
+      console.log(err)
+      res.status(500).json({msg:"Internal server error",err})
+  }
+})
 
 router.put("/:id",(req,res)=>{
   Category.update({
